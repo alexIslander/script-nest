@@ -4,7 +4,7 @@
 # Read the username to create
 while true; do
   read -p "Enter the username to create: " USERNAME
-  if [[ $USERNAME =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]{2,31}$ ]]; then
+  if [[ $USERNAME =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]{1,31}$ ]]; then
     break
   else
     echo "Error: Invalid username. Please enter a username with only letters, numbers, underscores, and hyphens, and between 3 and 32 characters long."
@@ -20,8 +20,11 @@ fi
 # Read the username to copy (default to pi)
 while true; do
   read -p "Enter the username to copy (default: pi): " COPY_USERNAME
-  COPY_USERNAME=${COPY_USERNAME:-pi}
-  if [[ $COPY_USERNAME =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]{2,31}$ ]]; then
+  if [[ -z "$COPY_USERNAME" ]]; then
+    COPY_USERNAME="pi"
+  fi
+
+  if [[ $COPY_USERNAME =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]{1,31}$ ]]; then
     break
   else
     echo "Error: Invalid username. Please enter a username with only letters, numbers, underscores, and hyphens, and between 3 and 32 characters long."
@@ -41,11 +44,15 @@ if ! (
   # Add the new user to the sudo group
   sudo adduser $USERNAME sudo
   # Get the groups that the copy user belongs to, excluding the copy user
-  COPY_GROUPS=$(groups $COPY_USERNAME | cut -d: -f2- | tr ' ' '\n' | grep -v "^$COPY_USERNAME$" | tr '\n' ' ')
-  # Add ssh group to the list
-  ALL_GROUPS="$COPY_GROUPS"
+  COPY_GROUPS=$(id -nG "$COPY_USERNAME" | tr ' ' ',')
+
+  # Check if there are any groups to add
+  if [[ -z "$COPY_GROUPS" ]]; then
+    echo "Warning: No additional groups found for $COPY_USERNAME."
+  else
   # Add the new user to all groups
-  sudo usermod -a -G $ALL_GROUPS $USERNAME
+  echo "Adding $USERNAME to groups: $COPY_GROUPS"
+  sudo usermod -a -G "$COPY_GROUPS" "$USERNAME"
 ); then
   # Print error message if something went wrong
   echo "Error: Failed to create and configure user $USERNAME"
