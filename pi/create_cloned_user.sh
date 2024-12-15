@@ -53,6 +53,7 @@ if ! (
   # Add the new user to all groups
   echo "Adding $USERNAME to groups: $COPY_GROUPS"
   sudo usermod -a -G "$COPY_GROUPS" "$USERNAME"
+  fi
 ); then
   # Print error message if something went wrong
   echo "Error: Failed to create and configure user $USERNAME"
