@@ -40,9 +40,11 @@ fi
 # Try to execute the commands
 if ! (
   # Create a new user
-  sudo adduser $USERNAME
+  sudo adduser "$USERNAME"
+  
   # Add the new user to the sudo group
-  sudo adduser $USERNAME sudo
+  sudo adduser "$USERNAME" sudo
+  
   # Get the groups that the copy user belongs to, excluding the copy user
   COPY_GROUPS=$(id -nG "$COPY_USERNAME" | tr ' ' ',')
 
@@ -50,9 +52,9 @@ if ! (
   if [[ -z "$COPY_GROUPS" ]]; then
     echo "Warning: No additional groups found for $COPY_USERNAME."
   else
-  # Add the new user to all groups
-  echo "Adding $USERNAME to groups: $COPY_GROUPS"
-  sudo usermod -a -G "$COPY_GROUPS" "$USERNAME"
+    # Add the new user to all groups
+    echo "Adding $USERNAME to groups: $COPY_GROUPS"
+    sudo usermod -a -G "$COPY_GROUPS" "$USERNAME"
   fi
 ); then
   # Print error message if something went wrong
