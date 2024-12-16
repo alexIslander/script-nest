@@ -55,6 +55,8 @@ if ! (
     # Add the new user to all groups
     echo "Adding $USERNAME to groups: $COPY_GROUPS"
     sudo usermod -a -G "$COPY_GROUPS" "$USERNAME"
+    # Remove the new user from copy user group (e.g.: pi)
+    sudo gpasswd -d "$USERNAME" "$COPY_USERNAME"
   fi
 ); then
   # Print error message if something went wrong
